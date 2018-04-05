@@ -30,7 +30,7 @@ from TCPClient import TCPClient
 from Command import COMMAND as cmd
 from Message import Messgae_Dialog
 
-from Freenove_Math import * 
+from Freenove_Math import *
 import time
 import threading
 import math
@@ -63,8 +63,8 @@ class DemoClass(QMainWindow, Ui_MainWindow):
         try :            
             file_Config = open("Config.txt", "r")
             self.default_Server_IP = file_Config.read()
-        except Exception, e:
-            print "Config.txt is not exist,If the Program is the first executed, To ignore this information", e
+        except Exception:
+            print ("Config.txt is not exist,If the Program is the first executed, To ignore this information", e)
         finally:
             file_Config.close()
         self.lineEdit_IP_Addr.setText(self.default_Server_IP) 
@@ -73,15 +73,9 @@ class DemoClass(QMainWindow, Ui_MainWindow):
         self.wgt_Drawing.setGeometry(10,10,400,300)
         self.wgt_Drawing.setVisible(False)
         self.mutex = threading.Lock()  
-        #self.t_Recv_Sonic_Thread = Recv_Sonic_Thread(self)
-        #self.t_Scan_Sonic_Thread = Scan_Sonic_Thread(self)
-        #self.t_Paint_Thread = Piant_Thread(self.wgt_Drawing)
-        #self.t_Paint_Thread.start()
         
     def loadLogo(self):
         scene = QGraphicsScene (self)
-        #scene.setSceneRect(-600, -600, 1200, 1200) 
-        #pic = QPixmap("imgs/logo02.png")
         pic = QPixmap(":/imgs/logo_Nomal")
         scene.addPixmap(pic)
         view = self.logo
@@ -229,10 +223,7 @@ class DemoClass(QMainWindow, Ui_MainWindow):
                 print "default_Server_IP is Changed!"
             self.webView.setZoomFactor(1.2)
             self.webView.setUrl(QUrl("http://"+server_ip+":8090/javascript_simple.html"))
-            
-            #wbv_Scale = 1.2
-            #self.webView.resize(400, 300)
-            #self.webView.setZoomFactor(wbv_Scale)            
+   
             self.lineEdit_IP_Addr.setEnabled(False)
             self.btn_Connect.setText( "DisConnect")
         elif self.btn_Connect.text() == "DisConnect":
@@ -368,7 +359,6 @@ class Recv_Sonic_Thread(threading.Thread):
                 print "Sonic Data error :", e
                 iSonic = 0
             self.wgt_main.sonic_buff[self.wgt_main.sonic_Index] = iSonic
-            #print iSonic  
 
 class Scan_Sonic_Thread(threading.Thread):
     def __init__(self, widget):
@@ -379,7 +369,6 @@ class Scan_Sonic_Thread(threading.Thread):
         #while True:
         while self.isRun:
             self.scan_Sonic()
-            #time.sleep(0.1)
             
     def scan_Sonic(self):
         self.min_Angle = 45
@@ -495,5 +484,3 @@ if __name__ == "__main__":
     dlg = DemoClass()
     dlg.show()
     sys.exit(app.exec_())
-    
-
