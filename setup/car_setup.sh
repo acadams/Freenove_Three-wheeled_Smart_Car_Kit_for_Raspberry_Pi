@@ -1,6 +1,8 @@
 #!/bin/bash
 
 sudo apt-get update
+sudo apt-get install realvnc-vnc-server
+sudo apt-get install realvnc-vnc-viewer
 sudo apt-get install i2c-tools
 sudo apt-get install python-smbus
 sudo apt-get install libv4l-dev
