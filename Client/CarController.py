@@ -24,6 +24,13 @@ class CarController:
     def __init__(self):
         ## allows for thread locking
         self.mutex = threading.Lock()
+        try:
+            self.tcp.connectToServer(address= (self.default_Server_IP, 12345))
+        except Exception:
+            print("Unable to connect to TCP Server. Make sure to run:")
+            print("python Main.py &")
+            print("In the Server directory")
+            return
 
     ### Camera Motion Methods ###
     def moveCameraVertically(self, delta):
