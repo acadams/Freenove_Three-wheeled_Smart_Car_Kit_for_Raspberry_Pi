@@ -98,8 +98,8 @@ if __name__ == '__main__':
 			exit() 
 		print sys.argv[0],sys.argv[1]
 		if sys.argv[1] == "servo":			
-			while True:		
-				for i in range(50,140,1):	
+			while True:
+				for i in range(50,140,1):
 					mdev.writeReg(mdev.CMD_SERVO1,numMap(i,0,180,500,2500))
 					time.sleep(0.005)
 				for i in range(140,50,-1):	
