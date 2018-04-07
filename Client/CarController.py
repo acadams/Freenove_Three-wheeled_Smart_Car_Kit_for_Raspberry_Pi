@@ -7,6 +7,8 @@ import threading
 import math
 import socket
 from CloseThreading import *
+import smbus
+import time
 
 class CarController:
     tcp = TCPClient()
@@ -16,6 +18,25 @@ class CarController:
     SERVO_MAX_ANGLE = 180
     sonicIndex = 0
     isTcpIdle = True
+	CMD_SERVO1 		= 	0
+	CMD_SERVO2 		= 	1
+	CMD_SERVO3 		= 	2
+	CMD_SERVO4 		= 	3
+	CMD_PWM1		=	4
+	CMD_PWM2		=	5
+	CMD_DIR1		=	6
+	CMD_DIR2		=	7
+	CMD_BUZZER		=	8
+	CMD_IO1			=	9
+	CMD_IO2			=	10
+	CMD_IO3			=	11
+	CMD_SONIC		=	12
+	SERVO_MAX_PULSE_WIDTH = 2500
+	SERVO_MIN_PULSE_WIDTH = 500
+	Is_IO1_State_True = False
+	Is_IO2_State_True = False
+	Is_IO3_State_True = False
+	Is_Buzzer_State_True = False
 
     # Quick one-liner for getting the local IP Address
     default_Server_IP = str(socket.gethostbyname(socket.gethostname()))
@@ -32,13 +53,16 @@ class CarController:
             print("In the Server directory")
             return
 
-    ### Camera Motion Methods ###
-    def moveCameraVertically(self, delta):
-        self.cameraVerticalPosition = self.cameraVerticalPosition + delta
-        self.cameraVerticalPosition = constrain(self.cameraVerticalPosition, self.SERVO_MIN_ANGLE, self.SERVO_MAX_ANGLE)
-        self.tcp.sendData(cmd.CMD_CAMERA_UP + str(self.cameraVerticalPosition))
+	def writeReg(self,cmd,value):
+		try:
+			self.bus.write_i2c_block_data(self.address,cmd,[value>>8,value&0xff])
+			time.sleep(0.001)
+		except Exception,e:
+			print Exception,"I2C Error :",e
 
-    def moveCameraHorizontally(self, delta):
+
+    ### Sonar Motion Methods ###
+    def moveSonarHorizontally(self, delta):
         self.cameraHorizontalPosition = self.cameraHorizontalPosition + delta
         self.cameraHorizontalPosition = constrain(self.cameraHorizontalPosition, self.SERVO_MIN_ANGLE, self.SERVO_MAX_ANGLE)
         self.tcp.sendData(cmd.CMD_CAMERA_LEFT + str(self.cameraHorizontalPosition))        
@@ -53,8 +77,16 @@ class CarController:
         self.tcp.sendData(cmd.CMD_CAMERA_UP + str(90))
 
     ### Car Motor Methods ###
-    def moveCarForward(self, speed):
-        self.setMoveSpeed(cmd.CMD_FORWARD, speed)
+    def moveCarForward(self):
+        self.writeReg(self.CMD_DIR1,0)
+        self.writeReg(self.CMD_DIR2,0)
+        for i in range(0,1000,10):
+            self.writeReg(self.CMD_PWM1,i)
+            self.writeReg(self.CMD_PWM2,i)
+            time.sleep(0.005)
+        time.sleep(1)
+
+        # self.setMoveSpeed(cmd.CMD_FORWARD, speed)
 
     def on_btn_Backward_pressed(self, speed):
         self.setMoveSpeed(cmd.CMD_BACKWARD, speed)
