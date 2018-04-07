@@ -85,7 +85,7 @@ class CarController:
             time.sleep(0.005)
         time.sleep(seconds)
 
-    def moveCarBackwards(self):
+    def moveCarBackwards(self, seconds):
         self.writeReg(self.CMD_DIR1,1)
         self.writeReg(self.CMD_DIR2,1)
         for i in range(0,1000,10):
