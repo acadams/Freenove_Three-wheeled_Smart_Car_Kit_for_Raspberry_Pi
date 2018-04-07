@@ -56,7 +56,6 @@ class DemoClass(QMainWindow, Ui_MainWindow):
         self.setFixedSize(self.width(), self.height())
         self.msgDlg = Messgae_Dialog()
         self.loadLogo()
-        #self.webView.setZoomFactor(1.0)
         self.webView.setUrl(QUrl("html/car_photo.html"))
         self.webView.page().mainFrame().setScrollBarPolicy(Qt.Horizontal, Qt.ScrollBarAlwaysOff)
         self.webView.page().mainFrame().setScrollBarPolicy(Qt.Vertical, Qt.ScrollBarAlwaysOff) 
@@ -73,7 +72,7 @@ class DemoClass(QMainWindow, Ui_MainWindow):
         self.wgt_Drawing.setGeometry(10,10,400,300)
         self.wgt_Drawing.setVisible(False)
         self.mutex = threading.Lock()  
-        
+
     def loadLogo(self):
         scene = QGraphicsScene (self)
         pic = QPixmap(":/imgs/logo_Nomal")
@@ -83,51 +82,51 @@ class DemoClass(QMainWindow, Ui_MainWindow):
         view.setScene(scene)
         view.setRenderHint(QPainter.Antialiasing)
         view.show()
-   
+
     @pyqtSignature("")
     def on_btn_Up_pressed(self):        
         self.Camera_V_Pos = self.Camera_V_Pos + self.slider_Camera.value()
         self.Camera_V_Pos = constrain(self.Camera_V_Pos, self.SERVO_MIN_ANGLE, self.SERVO_MAX_ANGLE)
         self.slider_Camera_V.setValue(self.Camera_V_Pos)
         self.tcp.sendData(cmd.CMD_CAMERA_UP + str(self.Camera_V_Pos))
-    
+
     @pyqtSignature("")
     def on_btn_Up_released(self):
         self.tcp.sendData(cmd.CMD_CAMERA_STOP)
-    
+
     @pyqtSignature("")
     def on_btn_Left_pressed(self):
         self.Camera_H_Pos = self.Camera_H_Pos + self.slider_Camera.value()
         self.Camera_H_Pos = constrain(self.Camera_H_Pos, self.SERVO_MIN_ANGLE, self.SERVO_MAX_ANGLE)
         self.slider_Camera_H.setValue(self.Camera_H_Pos)
         self.tcp.sendData(cmd.CMD_CAMERA_LEFT + str(self.Camera_H_Pos))        
-    
+
     @pyqtSignature("")
     def on_btn_Left_released(self):
         self.tcp.sendData(cmd.CMD_CAMERA_STOP)
-    
+
     @pyqtSignature("")
     def on_btn_Down_pressed(self):
         self.Camera_V_Pos = self.Camera_V_Pos - self.slider_Camera.value()
         self.Camera_V_Pos = constrain(self.Camera_V_Pos, 80, self.SERVO_MAX_ANGLE)
         self.slider_Camera_V.setValue(self.Camera_V_Pos)
         self.tcp.sendData(cmd.CMD_CAMERA_DOWN + str(self.Camera_V_Pos))        
-    
+
     @pyqtSignature("")
     def on_btn_Down_released(self):
         self.tcp.sendData(cmd.CMD_CAMERA_STOP)
-    
+
     @pyqtSignature("")
     def on_btn_Right_pressed(self):
         self.Camera_H_Pos = self.Camera_H_Pos - self.slider_Camera.value()
         self.Camera_H_Pos = constrain(self.Camera_H_Pos, self.SERVO_MIN_ANGLE, self.SERVO_MAX_ANGLE)
         self.slider_Camera_H.setValue(self.Camera_H_Pos)
         self.tcp.sendData(cmd.CMD_CAMERA_LEFT + str(self.Camera_H_Pos))
-    
+
     @pyqtSignature("")
     def on_btn_Right_released(self):
         self.tcp.sendData(cmd.CMD_CAMERA_STOP)
-    
+
     @pyqtSignature("")
     def on_btn_Home_clicked(self):
         self.Camera_H_Pos = 90
@@ -136,35 +135,33 @@ class DemoClass(QMainWindow, Ui_MainWindow):
         self.slider_Camera_V.setValue(self.Camera_V_Pos)
         self.tcp.sendData(cmd.CMD_CAMERA_LEFT + str(90+self.slider_FineServo2.value()))
         self.tcp.sendData(cmd.CMD_CAMERA_UP + str(90+self.slider_FineServo2.value()))
-        
+
     @pyqtSignature("")
     def on_btn_Forward_pressed(self):
-        #self.tcp.sendData(cmd.CMD_FORWARD + str(self.slider_Speed.value()))
         self.setMoveSpeed(cmd.CMD_FORWARD,self.slider_Speed.value())
-    
+
     @pyqtSignature("")
     def on_btn_Forward_released(self):
         self.tcp.sendData(cmd.CMD_STOP)
-    
+
     @pyqtSignature("")
     def on_btn_TurnLeft_pressed(self):
         self.tcp.sendData(cmd.CMD_TURN_LEFT + str(self.slider_Direction.value() + self.slider_FineServo1.value()))
-    
+
     @pyqtSignature("")
     def on_btn_TurnLeft_released(self):
         self.tcp.sendData(cmd.CMD_TURN_CENTER + str(90+self.slider_FineServo1.value()))
-    
+
     @pyqtSignature("")
     def on_btn_TurnRight_pressed(self):
         self.tcp.sendData(cmd.CMD_TURN_RIGHT + str(self.slider_Direction.value() + self.slider_FineServo1.value()))
-    
+
     @pyqtSignature("")
     def on_btn_TurnRight_released(self):
         self.tcp.sendData(cmd.CMD_TURN_CENTER + str(90+self.slider_FineServo1.value()))
-    
+
     @pyqtSignature("")
     def on_btn_Backward_pressed(self):
-        #self.tcp.sendData(cmd.CMD_BACKWARD + str(self.slider_Speed.value()))
         self.setMoveSpeed(cmd.CMD_BACKWARD,self.slider_Speed.value())
     
     @pyqtSignature("")
@@ -185,20 +182,17 @@ class DemoClass(QMainWindow, Ui_MainWindow):
                 self.t_Scan_Sonic_Thread.start()
                 self.Is_Paint_Thread_On = True
             self.btn_Mode.setText("RADAR")
-        elif self.btn_Mode.text() == "RADAR":            
+        elif self.btn_Mode.text() == "RADAR":
             self.wgt_Drawing.setVisible(False)
             self.webView.setVisible(True)          
-            if self.Is_Paint_Thread_On == True:    
-                if self.t_Paint_Thread.is_alive():                    
-                    #stop_thread(self.t_Paint_Thread)
+            if self.Is_Paint_Thread_On == True:
+                if self.t_Paint_Thread.is_alive():
                     self.t_Paint_Thread.isRun = False
                     print "Stop_thread ... -> t_Paint_Thread", self.t_Paint_Thread.getName()                
                 if self.t_Recv_Sonic_Thread.is_alive():
-                    #stop_thread(self.t_Recv_Sonic_Thread)
                     self.t_Recv_Sonic_Thread.isRun = False
                     print "Stop_thread ... -> t_Recv_Sonic_Thread", self.t_Recv_Sonic_Thread.getName()
                 if self.t_Scan_Sonic_Thread.is_alive():
-                    #stop_thread(self.t_Scan_Sonic_Thread)
                     self.t_Scan_Sonic_Thread.isRun = False
                     print "Stop_thread ... -> t_Scan_Sonic_Thread", self.t_Scan_Sonic_Thread.getName()
                 self.Is_Paint_Thread_On = False
@@ -277,7 +271,6 @@ class DemoClass(QMainWindow, Ui_MainWindow):
         if event.isAutoRepeat():
             pass
         else :
-            #print "You Pressed Key : ", event.key(), event.text() 
             if event.key() == Qt.Key_W:
                 self.setMoveSpeed(cmd.CMD_FORWARD,self.slider_Speed.value())
             elif event.key() == Qt.Key_S:
@@ -293,7 +286,6 @@ class DemoClass(QMainWindow, Ui_MainWindow):
         if event.isAutoRepeat():
             pass
         else:
-            #print "You Released Key : ", event.key()
             if event.key() == Qt.Key_W or event.key() == Qt.Key_S :
                 self.tcp.sendData(cmd.CMD_STOP)
             elif event.key() == Qt.Key_A or event.key() == Qt.Key_D:
@@ -316,12 +308,10 @@ class DemoClass(QMainWindow, Ui_MainWindow):
     @pyqtSignature("int")
     def on_slider_Speed_valueChanged(self, value):
         pass
-        #self.tcp.sendData(cmd.CMD_SPEED_SLIDER + str(value))
     
     @pyqtSignature("int")
     def on_slider_Direction_valueChanged(self, value):
         pass
-        #self.tcp.sendData(cmd.CMD_DIR_SLIDER + str(value))
     @pyqtSignature("")
     def on_btn_RGB_R_clicked(self):
         self.tcp.sendData(cmd.CMD_RGB_R)    
@@ -334,7 +324,6 @@ class DemoClass(QMainWindow, Ui_MainWindow):
     @pyqtSignature("")
     def on_btn_Buzzer_clicked(self):
         pass
-        #self.tcp.sendData(cmd.CMD_BUZZER_ALARM)        
     @pyqtSignature("")
     def on_btn_Buzzer_pressed(self):
         self.tcp.sendData(cmd.CMD_BUZZER_ALARM)        
@@ -398,7 +387,6 @@ class Scan_Sonic_Thread(threading.Thread):
         print self.wgt_main.sonic_buff  
         
 class Piant_Thread(threading.Thread):
-    #wgt_Drawing = PaintArea(QMainWindow)
     def __init__(self, widget):
         super(Piant_Thread, self).__init__()
         self.wgt_main = widget
@@ -407,14 +395,12 @@ class Piant_Thread(threading.Thread):
     def run(self):
         #while True:
         while self.isRun:
-            #print "Piant_Thread", self.getName()
             self.wgtDrawing.update()
             time.sleep(0.05)
     def scan_Sonic(self):
         self.min_Angle = 45
         self.max_Angle = 135
         self.inteval_Angle = 10
-        #print "scan Sonic...."
         for angle in range(self.min_Angle, self.max_Angle+1, self.inteval_Angle):
             self.wgt_main.sonic_Index = angle/self.inteval_Angle
             self.wgt_main.Camera_H_Pos = angle
@@ -423,9 +409,8 @@ class Piant_Thread(threading.Thread):
                 self.wgt_main.tcp.sendData(cmd.CMD_SONIC_LEFT+str(self.wgt_main.Camera_H_Pos))  
                 self.wgt_main.tcp.sendData(cmd.CMD_ULTRASONIC)
                 self.wgt_main.mutex.release()
-            #self.wgt_main.sonic_buff[angle/self.inteval_Angle] = iSonic            
             time.sleep(0.1)        
-        #send_Counter = send_Counter +1
+
         print self.wgt_main.sonic_buff
         for angle in range(self.max_Angle, self.min_Angle-1, -1*self.inteval_Angle):
             self.wgt_main.sonic_Index = angle/self.inteval_Angle
@@ -435,7 +420,6 @@ class Piant_Thread(threading.Thread):
                 self.wgt_main.tcp.sendData(cmd.CMD_SONIC_LEFT+str(self.wgt_main.Camera_H_Pos))  
                 self.wgt_main.tcp.sendData(cmd.CMD_ULTRASONIC)
                 self.wgt_main.mutex.release()
-            #self.wgt_main.sonic_buff[angle/self.inteval_Angle] = iSonic
             time.sleep(0.1)
         print self.wgt_main.sonic_buff    
 class PaintArea(QWidget):    
@@ -447,36 +431,31 @@ class PaintArea(QWidget):
         palette = QPalette()
         palette.setColor(QPalette.Background, QColor(192, 192, 192))
         self.setPalette(palette)
-        
+
     def paintEvent(self, event):
         qp = QtGui.QPainter()
         qp.begin(self)
         self.coordinate_system(qp)
         qp.end()
-        
+
     def coordinate_system(self,  qp):
         qp.setPen(QtCore.Qt.red)
-        size = self.size()        
-        #qp.drawRect(60, 60, 100, 100)
+        size = self.size()
         orgin_X = size.width()/2.0
         orgin_Y = size.height()-100
         qp.drawLine(0, orgin_Y, size.width(),orgin_Y )
         qp.drawLine(orgin_X, 0, orgin_X,size.height())
-        #print time.ctime(),"refrash....."
         for r in range(20, self.max_range, 20):
             r = constrain(r, 0, 200)
             qp.drawArc(orgin_X-r,orgin_Y-r, 2*r, 2*r, 0, 180*16)
-            #qp.drawText(orgin_X+r,orgin_Y+10, str(r))
-            #qp.drawText(orgin_X-r,orgin_Y+10, str(r))
         qp.setPen(QtCore.Qt.black)
         qp.setBrush(QtCore.Qt.black)
         qp.drawEllipse(orgin_X-5, orgin_Y-5, 10, 10)
         for i in range (0, 10, 1):
             d = self.parent.sonic_buff[i+4]
-            min_Angle = 45#self.parent.min_Angle
+            min_Angle = 45
             if d != 0:
                 qp.drawEllipse(orgin_X + 2*d*math.cos((min_Angle+i*10)/180.0*math.pi), orgin_Y - 2*d*math.sin((min_Angle+i*10)/180.0*math.pi), 5, 5)
-        #for target_cycle in 
             
 if __name__ == "__main__":
     import sys
