@@ -11,7 +11,6 @@ def numMap(value,fromLow,fromHigh,toLow,toHigh):
 
 class CarController:
     tcp = TCPClient()
-    sonicHorizontalPosition = 90
 
     ## Ultrasonic Data
     sonicIndex = 0
@@ -46,13 +45,14 @@ class CarController:
     default_Server_IP = str(socket.gethostbyname(socket.gethostname()))
 
     ## Init function
-    def __init__(self, angle = 90):
+    def __init__(self, sonarAngle = 90, turnAngle = 90):
         ## allows for thread locking
         self.mutex = threading.Lock()
         self.address = 0x18
         self.bus = smbus.SMBus(1)
         self.bus.open(1)
-        self.setDefaultTurnAngle(angle)
+        self.setStraightSonarAngle(sonarAngle)
+        self.setStraightTurnAngle(turnAngle)
         try:
             self.tcp.connectToServer(address= (self.default_Server_IP, 12345))
         except Exception:
@@ -65,21 +65,18 @@ class CarController:
         try:
             self.bus.write_i2c_block_data(self.address, cmd, [value>>8, value&0xff])
             time.sleep(0.001)
-        except Exception,e:
-            print Exception,"I2C Error :",e
+        except Exception as e:
+            print ("I2C Error :" + str(e))
 
     def readReg(self,cmd):
         [a,b] = self.bus.read_i2c_block_data(self.address, cmd, 2)
         return a<<8 | b
 
-    def sendTCPData(self, data):
-        self.tcpClientSock.send(data)
-
     ### Sonar Motion Methods ###
     def getSonicData(self):
         SonicEchoTime = self.readReg(self.CMD_SONIC)
-	distance = SonicEchoTime * 17.0 / 1000.0
-	return distance
+        distance = SonicEchoTime * 17.0 / 1000.0
+        return distance
 
     def turnOnSonar(self):
         self.scanSonicThread = Scan_Sonic_Thread(self)
@@ -102,8 +99,18 @@ class CarController:
             self.writeReg(self.CMD_PWM2,i)
             time.sleep(0.005)
 
-    def setDefaultTurnAngle(self, angle):
+    ## Helper method for calibrating what 'straight' is for the
+    ## car's wheel axis
+    def setStraightTurnAngle(self, angle):
+        self.straightTurnAngle = angle
         self.writeReg(self.CMD_SERVO1, numMap(angle,0,180,self.SERVO_MIN_PULSE_WIDTH,self.SERVO_MAX_PULSE_WIDTH))
+
+    ## Helper method for calibrating what 'straight' is for the
+    ## car's sonar axis
+    def setStraightSonarAngle(self, angle):
+        self.straightSonarAngle = angle
+        self.writeReg(self.CMD_SERVO2, numMap(angle,0,180,self.SERVO_MIN_PULSE_WIDTH,self.SERVO_MAX_PULSE_WIDTH))
+
     def moveCarBackwards(self):
         self.writeReg(self.CMD_DIR1,1)
         self.writeReg(self.CMD_DIR2,1)
@@ -118,14 +125,14 @@ class CarController:
 
     ### Car Turning Methods ###
     def turnLeft(self):
-        min_Angle = 75
+        min_Angle = self.straightTurnAngle - 45
         inteval_Angle = 10
-        for angle in range(120, min_Angle + 1, -inteval_Angle):
+        for angle in range(self.straightTurnAngle, min_Angle + 1, -inteval_Angle):
             if self.mutex.acquire():
                 self.writeReg(self.CMD_SERVO1, numMap(angle,0,180,self.SERVO_MIN_PULSE_WIDTH,self.SERVO_MAX_PULSE_WIDTH))
                 self.mutex.release()
                 time.sleep(.2)
-        for angle in range(min_Angle, 120, inteval_Angle):
+        for angle in range(min_Angle, self.straightTurnAngle, inteval_Angle):
             if self.mutex.acquire():
                 self.writeReg(self.CMD_SERVO1, numMap(angle,0,180,self.SERVO_MIN_PULSE_WIDTH,self.SERVO_MAX_PULSE_WIDTH))
                 self.mutex.release()
@@ -133,14 +140,14 @@ class CarController:
         print('finished turning left')
 
     def turnRight(self):
-        max_Angle = 165
+        max_Angle = self.straightTurnAngle + 45
         inteval_Angle = 10
-        for angle in range(120, max_Angle + 1, inteval_Angle):
+        for angle in range(self.straightTurnAngle, max_Angle + 1, inteval_Angle):
             if self.mutex.acquire():
                 self.writeReg(self.CMD_SERVO1, numMap(angle,0,180,self.SERVO_MIN_PULSE_WIDTH,self.SERVO_MAX_PULSE_WIDTH))
                 self.mutex.release()
                 time.sleep(.2)
-        for angle in range(max_Angle, 120 + 1, -inteval_Angle):
+        for angle in range(max_Angle, self.straightTurnAngle + 1, -inteval_Angle):
             if self.mutex.acquire():
                 self.writeReg(self.CMD_SERVO1, numMap(angle,0,180,self.SERVO_MIN_PULSE_WIDTH,self.SERVO_MAX_PULSE_WIDTH))
                 self.mutex.release()
@@ -159,8 +166,8 @@ class Recv_Sonic_Thread(threading.Thread):
             sonic = self.wgt_main.tcp.recvData()
             try:
                 iSonic = float(sonic)
-            except Exception, e:
-                print "Sonic Data error: ", e
+            except Exception as e:
+                print ("Sonic Data error: ", e)
                 iSonic = 0
             self.wgt_main.sonicBuff[self.wgt_main.sonicIndex] = iSonic
 
@@ -175,8 +182,8 @@ class Scan_Sonic_Thread(threading.Thread):
             self.scan_Sonic()
             
     def scan_Sonic(self):
-        self.min_Angle = 45
-        self.max_Angle = 135
+        self.min_Angle = self.wgt_main.straightTurnAngle - 45
+        self.max_Angle = self.wgt_main.straightTurnAngle + 45
         self.inteval_Angle = 10
         self.scan_speed = 0.05
         #print "scan Sonic...."
@@ -197,4 +204,4 @@ class Scan_Sonic_Thread(threading.Thread):
                 self.wgt_main.tcp.sendData(">Ultrasonic")
                 self.wgt_main.mutex.release()
             time.sleep(self.scan_speed)
-        print self.wgt_main.sonicBuff
+        print (self.wgt_main.sonicBuff)
