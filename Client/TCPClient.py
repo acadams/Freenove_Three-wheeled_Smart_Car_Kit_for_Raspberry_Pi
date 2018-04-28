@@ -33,6 +33,7 @@ class TCPClient:
         self.client = socket(AF_INET, SOCK_STREAM)
         self.client.settimeout(5)
         self.client.connect(address)
+        print("Connected")
     
     def disConnect(self):        
         try:
