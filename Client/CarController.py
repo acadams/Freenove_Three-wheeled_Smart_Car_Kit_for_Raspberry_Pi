@@ -72,12 +72,6 @@ class CarController:
         [a,b] = self.bus.read_i2c_block_data(self.address, cmd, 2)
         return a<<8 | b
 
-    ### Sonar Motion Methods ###
-    def getSonicData(self):
-        SonicEchoTime = self.readReg(self.CMD_SONIC)
-        distance = SonicEchoTime * 17.0 / 1000.0
-        return distance
-
     def turnOnSonar(self):
         self.scanSonicThread = Scan_Sonic_Thread(self)
         self.scanSonicThread.start()
