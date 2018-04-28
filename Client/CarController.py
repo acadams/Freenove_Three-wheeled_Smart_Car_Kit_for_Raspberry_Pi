@@ -121,7 +121,7 @@ class CarController:
         self.writeReg(self.CMD_PWM2,0)
 
     ### Car Turning Methods ###
-    def turnLeft(self):
+    def turnRight(self):
         min_Angle = self.straightTurnAngle - 45
         inteval_Angle = 10
         for angle in range(self.straightTurnAngle, min_Angle + 1, -inteval_Angle):
@@ -136,7 +136,7 @@ class CarController:
                 time.sleep(.2)
         print('finished turning left')
 
-    def turnRight(self):
+    def turnLeft(self):
         max_Angle = self.straightTurnAngle + 45
         inteval_Angle = 10
         for angle in range(self.straightTurnAngle, max_Angle + 1, inteval_Angle):
