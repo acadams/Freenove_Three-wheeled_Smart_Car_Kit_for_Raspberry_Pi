@@ -17,9 +17,9 @@ class CarController:
     sonicBuff = [0] * 20
 
     CMD_SERVO1 = 0 # Steering
-    CMD_SERVO2 = 1 # Horizontal Rotation
-    CMD_SERVO3 = 2
-    CMD_SERVO4 = 3
+    CMD_SERVO2 = 1 # Horizontal Rotation of Sonar
+    CMD_SERVO3 = 2 # Unused
+    CMD_SERVO4 = 3 # Unused
 
     ## The two motors
     CMD_PWM1 = 4
@@ -29,17 +29,20 @@ class CarController:
     CMD_DIR1 = 6
     CMD_DIR2 = 7
 
+    # Buzzer
     CMD_BUZZER = 8
+
+    # LED Lights
     CMD_IO1 = 9
     CMD_IO2 = 0
     CMD_IO3 = 1
+
+    # Ultrasonic
     CMD_SONIC = 2
+
+    # PWM Constraints
     SERVO_MAX_PULSE_WIDTH = 2500
     SERVO_MIN_PULSE_WIDTH = 500
-    Is_IO1_State_True = False
-    Is_IO2_State_True = False
-    Is_IO3_State_True = False
-    Is_Buzzer_State_True = False
 
     # Quick one-liner for getting the local IP Address
     default_Server_IP = str(socket.gethostbyname(socket.gethostname()))
@@ -147,6 +150,16 @@ class CarController:
                 self.mutex.release()
                 time.sleep(.2)
         print('finished turning right')
+
+    def setLEDValues(self, redValue, greenValue, blueValue):
+        self.writeReg(self.CMD_IO1, redValue)
+        self.writeReg(self.CMD_IO2, greenValue)
+        self.writeReg(self.CMD_IO3, blueValue)
+
+    def turnOnBuzzer(self, seconds):
+        self.writeReg(self.CMD_BUZZER, 2000)
+        time.sleep(seconds)
+        self.writeReg(self.CMD_BUZZER, 0)
 
 ## Setup for UltraSonic Threads ##
 class Recv_Sonic_Thread(threading.Thread):
