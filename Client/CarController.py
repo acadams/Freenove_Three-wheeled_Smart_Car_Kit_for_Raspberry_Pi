@@ -134,7 +134,7 @@ class CarController:
                 self.writeReg(self.CMD_SERVO1, numMap(angle,0,180,self.SERVO_MIN_PULSE_WIDTH,self.SERVO_MAX_PULSE_WIDTH))
                 self.mutex.release()
                 time.sleep(.2)
-        print('finished turning left')
+        print('finished turning right')
 
     def turnLeft(self):
         max_Angle = self.straightTurnAngle + 45
@@ -149,7 +149,7 @@ class CarController:
                 self.writeReg(self.CMD_SERVO1, numMap(angle,0,180,self.SERVO_MIN_PULSE_WIDTH,self.SERVO_MAX_PULSE_WIDTH))
                 self.mutex.release()
                 time.sleep(.2)
-        print('finished turning right')
+        print('finished turning left')
 
     def setLEDValues(self, redValue, greenValue, blueValue):
         self.writeReg(self.CMD_IO1, redValue)
