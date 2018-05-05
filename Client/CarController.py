@@ -32,11 +32,6 @@ class CarController:
     # Buzzer
     CMD_BUZZER = 8
 
-    # LED Lights
-    CMD_IO1 = 9
-    CMD_IO2 = 0
-    CMD_IO3 = 1
-
     # Ultrasonic
     CMD_SONIC = 2
 
@@ -150,11 +145,6 @@ class CarController:
                 self.mutex.release()
                 time.sleep(.2)
         print('finished turning left')
-
-    def setLEDValues(self, redValue, greenValue, blueValue):
-        self.writeReg(self.CMD_IO1, redValue)
-        self.writeReg(self.CMD_IO2, greenValue)
-        self.writeReg(self.CMD_IO3, blueValue)
 
     def turnOnBuzzer(self, seconds):
         self.writeReg(self.CMD_BUZZER, 2000)
