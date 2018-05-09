@@ -7,7 +7,7 @@ from CloseThreading import *
 import smbus
 
 def numMap(value,fromLow,fromHigh,toLow,toHigh):
-	return (toHigh-toLow)*(value-fromLow) / (fromHigh-fromLow) + toLow
+    return (toHigh-toLow)*(value-fromLow) / (fromHigh-fromLow) + toLow
 
 class CarController:
     tcp = TCPClient()
@@ -51,6 +51,7 @@ class CarController:
         self.bus.open(1)
         self.setStraightSonarAngle(sonarAngle)
         self.setStraightTurnAngle(turnAngle)
+
         try:
             self.tcp.connectToServer(address= (self.default_Server_IP, 12345))
         except Exception:
@@ -86,7 +87,7 @@ class CarController:
     def moveCarForward(self):
         self.writeReg(self.CMD_DIR1,0)
         self.writeReg(self.CMD_DIR2,0)
-        for i in range(0,500,10):
+        for i in range(0,350,10):
             self.writeReg(self.CMD_PWM1,i)
             self.writeReg(self.CMD_PWM2,i)
             time.sleep(0.005)
@@ -179,26 +180,24 @@ class Scan_Sonic_Thread(threading.Thread):
             self.scan_Sonic()
             
     def scan_Sonic(self):
-        self.min_Angle = self.wgt_main.straightTurnAngle - 45
-        self.max_Angle = self.wgt_main.straightTurnAngle + 45
-        self.inteval_Angle = 10
-        self.scan_speed = 0.05
-        #print "scan Sonic...."
-        for angle in range(self.min_Angle, self.max_Angle + 1, self.inteval_Angle):
-            self.wgt_main.sonicIndex = angle / self.inteval_Angle
-            self.wgt_main.sonicHorizontalPosition = angle
-            if self.wgt_main.mutex.acquire():
-                self.wgt_main.writeReg(self.wgt_main.CMD_SERVO2, numMap(angle,0,180,self.wgt_main.SERVO_MIN_PULSE_WIDTH,self.wgt_main.SERVO_MAX_PULSE_WIDTH))
-                self.wgt_main.tcp.sendData(">Ultrasonic")
-                self.wgt_main.mutex.release()
-            time.sleep(self.scan_speed)
+        self.min_Angle = 9
+        self.max_Angle = 181
+        self.inteval_Angle = 9
+        self.scan_speed = 0.5 / (40)
 
-        for angle in range(self.max_Angle, self.min_Angle - 1, -1 * self.inteval_Angle):
-            self.wgt_main.sonicIndex = angle / self.inteval_Angle
+        for angle in range(self.min_Angle, self.max_Angle, self.inteval_Angle):
+            self.wgt_main.sonicIndex = min(angle / self.inteval_Angle, 19)
             self.wgt_main.sonicHorizontalPosition = angle
             if self.wgt_main.mutex.acquire():
                 self.wgt_main.writeReg(self.wgt_main.CMD_SERVO2, numMap(angle,0,180,self.wgt_main.SERVO_MIN_PULSE_WIDTH,self.wgt_main.SERVO_MAX_PULSE_WIDTH))
                 self.wgt_main.tcp.sendData(">Ultrasonic")
                 self.wgt_main.mutex.release()
             time.sleep(self.scan_speed)
-        print (self.wgt_main.sonicBuff)
+        for angle in range(self.max_Angle, self.min_Angle + 1, -1 * self.inteval_Angle):
+            self.wgt_main.sonicIndex = min(angle / self.inteval_Angle, 19)
+            self.wgt_main.sonicHorizontalPosition = angle
+            if self.wgt_main.mutex.acquire():
+                self.wgt_main.writeReg(self.wgt_main.CMD_SERVO2, numMap(angle,0,180,self.wgt_main.SERVO_MIN_PULSE_WIDTH,self.wgt_main.SERVO_MAX_PULSE_WIDTH))
+                self.wgt_main.tcp.sendData(">Ultrasonic")
+                self.wgt_main.mutex.release()
+            time.sleep(self.scan_speed)
