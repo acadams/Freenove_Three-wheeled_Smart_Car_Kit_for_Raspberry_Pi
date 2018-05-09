@@ -21,7 +21,7 @@ class MoveCarThread(threading.Thread):
         self.controller = CarController(90, 120)
         self.isRun = True
         self.CHECK_TIME = checkTime
-        GPIO.setmode(GPIO.BCM)
+        GPIO.setmode(GPIO.BOARD)
 
     def splitData(self, sonicData):
         splitDataList = []
@@ -34,6 +34,7 @@ class MoveCarThread(threading.Thread):
 
     def setLightPins(self, redPin, greenPin, bluePin):
           GPIO.cleanup()
+          GPIO.setmode(GPIO.BOARD)
           GPIO.setup(redPin, GPIO.OUT)
           GPIO.setup(greenPin, GPIO.OUT)
           GPIO.setup(bluePin, GPIO.OUT)
@@ -42,9 +43,14 @@ class MoveCarThread(threading.Thread):
           self.BLUE_PIN = bluePin
 
     def toggleLightPins(self, turnOnRed, turnOnGreen, turnOnBlue):
-          GPIO.output(self.RED_PIN, turnOnRed)
-          GPIO.output(self.GREEN_PIN, turnOnGreen)
-          GPIO.output(self.BLUE_PIN, turnOnBlue)
+        '''
+        Anthony why are you negating everything??? B/c the led light
+        starts turned ON, so everything we want to do should be
+        reversed
+        '''
+        GPIO.output(self.RED_PIN, not turnOnRed)
+        GPIO.output(self.GREEN_PIN, not turnOnGreen)
+        GPIO.output(self.BLUE_PIN, not turnOnBlue)
 
     def getTopData(self, splitData):
         return splitData[2]
@@ -54,8 +60,8 @@ class MoveCarThread(threading.Thread):
 
     def shouldStopCar(self, topData):
         averageDistance = self.getAverageDistance(topData)
-        print('Average data value: ', avaverageDistanceeDist)
-        return avaverageDistanceeDist < STOP_LIMIT
+        print('Average data value: ', averageDistance)
+        return averageDistance < STOP_LIMIT
 
     '''
     Helper method for filtering out large/nonexistant data that we
