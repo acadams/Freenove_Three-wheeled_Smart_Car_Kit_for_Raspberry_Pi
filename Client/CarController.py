@@ -178,6 +178,24 @@ class CarController:
         time.sleep(seconds)
         self.writeReg(self.CMD_BUZZER, 0)
 
+    def turnAtAngle(self, turnAngle, turnTime):
+        if (turnAngle >= 90):
+            intervalScalar = 1
+        else:
+            intervalScalar = -1
+        intervalAngle = float(abs(self.straightTurnAngle - turnAngle)) / 10
+        turnSpeed = turnTime / 20
+        for angle in range(self.straightTurnAngle, turnAngle + 1, (intervalAngle * intervalScalar)):
+            if self.mutex.acquire():
+                self.writeReg(self.CMD_SERVO1, numMap(angle,0,180,self.SERVO_MIN_PULSE_WIDTH,self.SERVO_MAX_PULSE_WIDTH))
+                self.mutex.release()
+                time.sleep(turnSpeed)
+        for angle in range(turnAngle, self.straightTurnAngle + 1, -(intervalAngle * intervalScalar)):
+            if self.mutex.acquire():
+                self.writeReg(self.CMD_SERVO1, numMap(angle,0,180,self.SERVO_MIN_PULSE_WIDTH,self.SERVO_MAX_PULSE_WIDTH))
+                self.mutex.release()
+                time.sleep(turnSpeed)
+
 ## Setup for UltraSonic Threads ##
 class Recv_Sonic_Thread(threading.Thread):
     def __init__(self, widget):
@@ -204,7 +222,7 @@ class Scan_Sonic_Thread(threading.Thread):
     def run(self):
         while self.isRun:
             self.scan_Sonic()
-            
+
     def scan_Sonic(self):
         self.min_Angle = 9
         self.max_Angle = 181
