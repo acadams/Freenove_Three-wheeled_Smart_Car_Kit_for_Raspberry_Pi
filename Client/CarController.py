@@ -39,6 +39,8 @@ class CarController:
     SERVO_MAX_PULSE_WIDTH = 2500
     SERVO_MIN_PULSE_WIDTH = 500
 
+    CAR_SPEED = 350
+
     # Quick one-liner for getting the local IP Address
     default_Server_IP = str(socket.gethostbyname(socket.gethostname()))
 
@@ -87,10 +89,31 @@ class CarController:
     def moveCarForward(self):
         self.writeReg(self.CMD_DIR1,0)
         self.writeReg(self.CMD_DIR2,0)
+        # always start movement at min speed
         for i in range(0,350,10):
             self.writeReg(self.CMD_PWM1,i)
             self.writeReg(self.CMD_PWM2,i)
             time.sleep(0.005)
+
+    def slowCarDown(self):
+        if (self.CAR_SPEED == 350):
+            # do nothing, at min speed
+            return
+        for speedDelta in range(self.CAR_SPEED, 350, -10):
+            self.writeReg(self.CMD_PWM1,speedDelta)
+            self.writeReg(self.CMD_PWM2,speedDelta)
+            time.sleep(0.005)
+        self.CAR_SPEED = 350
+
+    def speedCarUp(self):
+        if (self.CAR_SPEED == 500):
+            # do nothing, at max speed
+            return
+        for speedDelta in range(self.CAR_SPEED, 500, 10):
+            self.writeReg(self.CMD_PWM1,speedDelta)
+            self.writeReg(self.CMD_PWM2,speedDelta)
+            time.sleep(0.005)
+        self.CAR_SPEED = 500
 
     ## Helper method for calibrating what 'straight' is for the
     ## car's wheel axis
@@ -107,14 +130,17 @@ class CarController:
     def moveCarBackwards(self):
         self.writeReg(self.CMD_DIR1,1)
         self.writeReg(self.CMD_DIR2,1)
-        for i in range(0,500,10):
+        # not using the car speed, will always reverse at min speed for safety
+        for i in range(0,350,10):
             self.writeReg(self.CMD_PWM1,i)
             self.writeReg(self.CMD_PWM2,i)
             time.sleep(0.005)
 
     def stopCar(self):
-        self.writeReg(self.CMD_PWM1,0)
-        self.writeReg(self.CMD_PWM2,0)
+        for speedDelta in range(self.CAR_SPEED, 0, 10):
+            self.writeReg(self.CMD_PWM1,speedDelta)
+            self.writeReg(self.CMD_PWM2,speedDelta)
+            time.sleep(0.005)
 
     ### Car Turning Methods ###
     def turnRight(self):
