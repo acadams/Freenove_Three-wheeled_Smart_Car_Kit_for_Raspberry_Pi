@@ -5,7 +5,9 @@ import threading
 import RPi.GPIO as GPIO
 
 ## Default variables
-STOP_LIMIT = 50
+STOP_LIMIT = 40
+SLOW_DOWN_LIMIT = 110
+TURN_LIMIT = 90
 
 '''
 This is the MoveCarThread Class. We did not go into threading in the previous
