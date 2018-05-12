@@ -137,7 +137,7 @@ class CarController:
             time.sleep(0.005)
 
     def stopCar(self):
-        for speedDelta in range(self.CAR_SPEED, 0, 10):
+        for speedDelta in range(self.CAR_SPEED, 0, -10):
             self.writeReg(self.CMD_PWM1,speedDelta)
             self.writeReg(self.CMD_PWM2,speedDelta)
             time.sleep(0.005)
@@ -183,14 +183,14 @@ class CarController:
             intervalScalar = 1
         else:
             intervalScalar = -1
-        intervalAngle = float(abs(self.straightTurnAngle - turnAngle)) / 10
-        turnSpeed = turnTime / 20
+        intervalAngle = int(float(abs(self.straightTurnAngle - turnAngle)) / 5)
+        turnSpeed = float(turnTime) / 10
         for angle in range(self.straightTurnAngle, turnAngle + 1, (intervalAngle * intervalScalar)):
             if self.mutex.acquire():
                 self.writeReg(self.CMD_SERVO1, numMap(angle,0,180,self.SERVO_MIN_PULSE_WIDTH,self.SERVO_MAX_PULSE_WIDTH))
                 self.mutex.release()
                 time.sleep(turnSpeed)
-        for angle in range(turnAngle, self.straightTurnAngle + 1, -(intervalAngle * intervalScalar)):
+        for angle in range(turnAngle, self.straightTurnAngle - 1, -(intervalAngle * intervalScalar)):
             if self.mutex.acquire():
                 self.writeReg(self.CMD_SERVO1, numMap(angle,0,180,self.SERVO_MIN_PULSE_WIDTH,self.SERVO_MAX_PULSE_WIDTH))
                 self.mutex.release()
